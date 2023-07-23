@@ -27,15 +27,19 @@ function mountElement(vnode, container) {
   if (typeof children === 'string') {
     el.textContent = children
   } else if (Array.isArray(children)) {
-    children.forEach((v) => {
-      patch(v, el)
-    })
+    mountChildren(vnode, el)
   }
   for (const key in props) {
     const val = props[key]
     el.setAttribute(key, val)
   }
   container.append(el)
+}
+
+function mountChildren(vnode, container) {
+  vnode.children.forEach((v) => {
+    patch(v, container)
+  })
 }
 
 function processComponent(vnode, container) {
