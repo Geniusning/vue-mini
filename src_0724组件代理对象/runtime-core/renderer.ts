@@ -1,4 +1,3 @@
-import { ShapeFlags } from '../shared/ShapeFlags'
 import { isObject } from '../shared/index'
 import { createComponentInstance, setupComponent } from './component'
 
@@ -10,10 +9,10 @@ export function render(vnode, container) {
 function patch(vnode, container) {
   // todo 判断vnode 是不是一个element
   // 是element 那么久应该处理element
-  const { shapesFlag } = vnode
-  if (shapesFlag & ShapeFlags.ELEMENT) {
+  console.log('vnodes', typeof vnode.type)
+  if (typeof vnode.type === 'string') {
     processElement(vnode, container)
-  } else if (shapesFlag & ShapeFlags.STATEFUL_COMPONENT) {
+  } else if (isObject(vnode)) {
     processComponent(vnode, container)
   }
 }
@@ -24,21 +23,15 @@ function processElement(vnode, container) {
 
 function mountElement(vnode, container) {
   const el = (vnode.el = document.createElement(vnode.type))
-  const { props, children, shapesFlag } = vnode
-  if (shapesFlag & ShapeFlags.TEXT_CHILDREN) {
+  const { props, children } = vnode
+  if (typeof children === 'string') {
     el.textContent = children
-  } else if (shapesFlag & ShapeFlags.ARRAY_CHILDREN) {
+  } else if (Array.isArray(children)) {
     mountChildren(vnode, el)
   }
   for (const key in props) {
     const val = props[key]
-    const isOn = (key: string) => /^on[A-Z]/.test(key)
-    if (isOn(key)) {
-      const event = key.slice(2).toLocaleLowerCase()
-      el.addEventListener(event, val)
-    } else {
-      el.setAttribute(key, val)
-    }
+    el.setAttribute(key, val)
   }
   container.append(el)
 }
@@ -60,6 +53,7 @@ function mountComponent(initialVnode, container) {
 }
 
 function setupRenderEffect(instance: any, initialVnode, container) {
+  console.log('instance', instance)
   const { proxy } = instance
   const subTree = instance.render.call(proxy)
 
